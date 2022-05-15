@@ -18,32 +18,75 @@ export default class Router {
   constructor(req, res) {
     this.req = req;
     this.res = res;
-    this.onion = {};
+    this.routes = {};
+    this.middlewares = [];
+  }
+
+  addRoute(method, path, handler, middlewares = []) {
+    this.routes[path][method] = { handler, middlewares }
+  }
+
+  get(path, handler, middlewares = []) {
+    this.addRoute('GET', path, handler, middlewares);
+  }
+
+  post(path, handler, middlewares = []) {
+    this.addRoute('POST', path, handler, middlewares);
+  }
+
+  put(path, handler, middlewares = []) {
+    this.addRoute('PUT', path, handler, middlewares);
+  }
+
+  delete(path, handler, middlewares = []) {
+    this.addRoute('DELETE', path, handler, middlewares);
+  }
+
+  addMiddleware(middleware) {
+    this.middlewares.push(middleware);
   }
 
   route() {
-    console.log('Router.route()');
+    const { url, method } = this.req;
 
-    const onion = new Onion(() => {
-      console.log('Core function');
-    })
+    this.routePack = this.routes[url];
+    if (!this.routePack) {
+      this.res.writeHead(404, { 'Content-Type': 'text/plain' });
+      this.res.end('Not found');
+      return;
+    }
 
-    onion.wrap((req, next) => {
-      const res = next(req);
-      console.log('First middleware');
+    const route = this.routePack[method];
+    if (!route) {
+      this.res.writeHead(405, { 'Content-Type': 'text/plain' });
+      this.res.end('Method not allowed');
+      return;
+    }
 
-      return res;
-    })
+    const handler = route.handler;
+    const middlewares = route.middlewares;
 
-    onion.wrap((req, next) => {
-      const res = next(req);
-      console.log('Second middleware');
+    if (!handler) {
+      console.log('No handler');
+      this.res.writeHead(500, { 'Content-Type': 'text/plain' });
+      this.res.end('Internal server error');
+      return;
+    }
 
-      return res;
-    })
+    const onion = new Onion(handler);
+    middlewares.forEach(middleware => {
+      onion.addMiddleware(middleware);
+    });
 
-    onion.dispatch(this.req);
+    this.middlewares.forEach(middleware => {
+      onion.addMiddleware(middleware);
+    });
 
-    this.res.end();
+    const response = onion.dispatch(this.req) || {};
+    const { statusCode = 200, body = {}, headers = {} } = response;
+    headers['Content-Type'] = 'application/json';
+
+    this.res.writeHead(statusCode, headers);
+    this.res.end(JSON.stringify(body));
   }
 }
