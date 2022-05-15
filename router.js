@@ -15,9 +15,7 @@ class Onion
 }
 
 export default class Router {
-  constructor(req, res) {
-    this.req = req;
-    this.res = res;
+  constructor() {
     this.routes = {};
     this.middlewares = [];
   }
@@ -46,20 +44,20 @@ export default class Router {
     this.middlewares.push(middleware);
   }
 
-  route() {
-    const { url, method } = this.req;
+  route(request, response) {
+    const { url, method } = request;
 
     this.routePack = this.routes[url];
     if (!this.routePack) {
-      this.res.writeHead(404, { 'Content-Type': 'text/plain' });
-      this.res.end('Not found');
+      response.writeHead(404, { 'Content-Type': 'text/plain' });
+      response.end('Not found');
       return;
     }
 
     const route = this.routePack[method];
     if (!route) {
-      this.res.writeHead(405, { 'Content-Type': 'text/plain' });
-      this.res.end('Method not allowed');
+      response.writeHead(405, { 'Content-Type': 'text/plain' });
+      response.end('Method not allowed');
       return;
     }
 
@@ -68,8 +66,8 @@ export default class Router {
 
     if (!handler) {
       console.log('No handler');
-      this.res.writeHead(500, { 'Content-Type': 'text/plain' });
-      this.res.end('Internal server error');
+      response.writeHead(500, { 'Content-Type': 'text/plain' });
+      response.end('Internal server error');
       return;
     }
 
@@ -82,11 +80,11 @@ export default class Router {
       onion.addMiddleware(middleware);
     });
 
-    const response = onion.dispatch(this.req) || {};
+    const response = onion.dispatch(request) || {};
     const { statusCode = 200, body = {}, headers = {} } = response;
     headers['Content-Type'] = 'application/json';
 
-    this.res.writeHead(statusCode, headers);
-    this.res.end(JSON.stringify(body));
+    response.writeHead(statusCode, headers);
+    response.end(JSON.stringify(body));
   }
 }
