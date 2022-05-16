@@ -3,7 +3,21 @@ import config from './config.js';
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
-import Router from './src/router.js';
+import Router from './router.js';
+
+
+/**
+ * Handlers...
+ */
+import test from './src/Adapters/Web/Handlers/test.js';
+
+
+/**
+ * Define the routes.
+ */
+const router = new Router();
+
+router.get('/', test.handler, test.middlewares);
 
 /**
  * @description Just to force https
@@ -23,6 +37,5 @@ https.createServer({
   key: fs.readFileSync(config.httpsKeyPath),
   cert: fs.readFileSync(config.httpsCertPath)
 }, (req, res) => {
-  const router = new Router(req, res);
-  router.route();
+  router.route(req, res);
 }).listen(config.httpsPort);
