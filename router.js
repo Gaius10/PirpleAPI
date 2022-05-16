@@ -10,7 +10,7 @@ class Onion
   }
 
   dispatch(request) {
-    this.onion(request);
+    return this.onion(request);
   }
 }
 
@@ -21,6 +21,7 @@ export default class Router {
   }
 
   addRoute(method, path, handler, middlewares = []) {
+    this.routes[path] = this.routes[path] || {};
     this.routes[path][method] = { handler, middlewares }
   }
 
@@ -44,7 +45,7 @@ export default class Router {
     this.middlewares.push(middleware);
   }
 
-  route(request, response) {
+  async route(request, response) {
     const { url, method } = request;
 
     this.routePack = this.routes[url];
@@ -80,8 +81,8 @@ export default class Router {
       onion.addMiddleware(middleware);
     });
 
-    const response = onion.dispatch(request) || {};
-    const { statusCode = 200, body = {}, headers = {} } = response;
+    const res = (await onion.dispatch(request)) || {};
+    const { statusCode = 200, body = {}, headers = {} } = res;
     headers['Content-Type'] = 'application/json';
 
     response.writeHead(statusCode, headers);
