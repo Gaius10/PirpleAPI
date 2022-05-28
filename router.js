@@ -1,3 +1,12 @@
+function getPayloadFromRequest(request) {
+  return new Promise((res, rej) => {
+    let payload = '';
+    request.on('data', chunk => payload += chunk);
+    request.on('error', rej);
+    request.on('end', res(payload))
+  });
+}
+
 class Onion
 {
   constructor(coreFunction) {
@@ -74,14 +83,16 @@ export default class Router {
 
     const onion = new Onion(handler);
     middlewares.forEach(middleware => {
-      onion.addMiddleware(middleware);
+      onion.wrap(middleware);
     });
 
     this.middlewares.forEach(middleware => {
-      onion.addMiddleware(middleware);
+      onion.wrap(middleware);
     });
 
-    const res = (await onion.dispatch(request)) || {};
+    const payload = await getPayloadFromRequest(request);
+
+    const res = (await onion.dispatch({ payload, request })) || {};
     const { statusCode = 200, body = {}, headers = {} } = res;
     headers['Content-Type'] = 'application/json';
 
