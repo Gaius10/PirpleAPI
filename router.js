@@ -1,9 +1,9 @@
 function getPayloadFromRequest(request) {
   return new Promise((res, rej) => {
     let payload = '';
-    request.on('data', chunk => payload += chunk);
+    request.on('data', chunk => payload += chunk.toString('utf8'));
     request.on('error', rej);
-    request.on('end', res(payload))
+    request.on('end', () => res(JSON.parse(payload)));
   });
 }
 
