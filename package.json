@@ -3,5 +3,8 @@
   "version": "0.0.0",
   "main": "index.js",
   "type": "module",
-  "author": "Caio Corrêa Chaves"
+  "author": "Caio Corrêa Chaves",
+  "scripts": {
+    "dev": "NODE_PATH=`pwd`/lib STORAGE_PATH=`pwd`/storage/database node index.js"
+  }
 }
