@@ -10,6 +10,12 @@ export default class UserInteractor
   }
 
   async getById(id) {
+    if (!id) {
+      throw {
+        statusCode: 400,
+        message: 'Invalid user id'
+      }
+    }
     return await this.userRepository.getUserById(id);
   }
 
@@ -34,7 +40,7 @@ export default class UserInteractor
     if (userExists) {
       throw {
         statusCode: 400,
-        message: `User with email ${user.email} already exists`
+        message: `User with email '${user.email}' already exists`
       };
     }
 
@@ -55,7 +61,7 @@ export default class UserInteractor
     if (!userExists) {
       throw {
         statusCode: 400,
-        message: `User with id ${id} does not exist`
+        message: `User with id '${id}' does not exist`
       };
     }
 
@@ -68,7 +74,7 @@ export default class UserInteractor
     if (!userExists) {
       throw {
         statusCode: 400,
-        message: `User with id ${id} does not exist`
+        message: `User with id '${id}' does not exist`
       };
     }
 
