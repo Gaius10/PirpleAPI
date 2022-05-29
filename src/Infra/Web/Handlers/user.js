@@ -6,7 +6,6 @@ const interactor = new UserInteractor(new UserRepository());
 
 export default {
   async create({ payload, request }) {
-    // name, phone, email, password
     const { name, phone, email, password } = payload;
 
     const createdUser = await interactor.create({ name, phone, email, password });
@@ -18,35 +17,40 @@ export default {
       }
     }
   },
-  read({ payload, request }) {
+  async read({ payload, request }) {
     return {
       statusCode: 200,
       body: {
-        message: 'working read'
+        user: await interactor.getById(payload.id),
       }
     }
   },
-  list({ payload, request }) {
+  /** @todo read filters from payload */
+  async list({ payload, request }) {
     return {
       statusCode: 200,
       body: {
-        message: 'working list'
+        users: await interactor.get({}),
       }
     }
   },
-  update({ payload, request }) {
+  async update({ payload, request }) {
+    const { id, name, phone, email, password } = payload;
+
+    const updatedUser = await interactor.update(id, { name, phone, email, password });
+
     return {
       statusCode: 200,
-      body: {
-        message: 'working update'
-      }
+      body: { updatedUser }
     }
   },
-  delete({ payload, request }) {
+  async delete({ payload, request }) {
+    const { id } = payload;
+    await interactor.delete(id);
     return {
       statusCode: 200,
       body: {
-        message: 'working delete'
+        message: 'User has been deleted'
       }
     }
   }
