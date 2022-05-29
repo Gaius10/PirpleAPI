@@ -5,11 +5,16 @@ import http from 'http';
 import https from 'https';
 import Router from './router.js';
 
+/**
+ * Middlewares...
+ */
+import errorHandler from './src/Infra/Web/Middlewares/error-handler.js';
+
 
 /**
  * Handlers...
  */
-import test from './src/Adapters/Web/Handlers/test.js';
+import user from './src/Infra/Web/Handlers/user.js';
 
 
 /**
@@ -17,7 +22,15 @@ import test from './src/Adapters/Web/Handlers/test.js';
  */
 const router = new Router();
 
-router.get('/', test.handler, test.middlewares);
+router.get('/', () => { return { statusCode: 200, body: { message: 'Working!' } } });
+
+router.get('/user',      user.read);
+router.get('/user/list', user.list);
+router.post('/user',     user.create);
+router.put('/user',      user.update);
+router.delete('/user',   user.delete);
+
+router.addMiddleware(errorHandler);
 
 /**
  * @description Just to force https

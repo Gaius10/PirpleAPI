@@ -23,13 +23,19 @@ export default class UserInteractor
 
   async create(user) {
     if (!this.validateUser(user)) {
-      throw new Error('Invalid user data');
+      throw {
+        statusCode: 400,
+        message: 'Invalid user data'
+      };
     }
 
     // Check if user exists
     const userExists = await this.userRepository.getUserByEmail(user.email);
     if (userExists) {
-      throw Error(`User with email ${user.email} already exists`);
+      throw {
+        statusCode: 400,
+        message: `User with email ${user.email} already exists`
+      };
     }
 
     // Create user
@@ -38,13 +44,19 @@ export default class UserInteractor
 
   async update(id, user) {
     if (!this.validateUser(user)) {
-      throw new Error('Invalid user data');
+      throw {
+        statusCode: 400,
+        message: 'Invalid user data'
+      };
     }
 
     // Check if user exists
     const userExists = await this.userRepository.getUserById(id);
     if (!userExists) {
-      throw Error(`User with id ${id} does not exist`);
+      throw {
+        statusCode: 400,
+        message: `User with id ${id} does not exist`
+      };
     }
 
     return await this.userRepository.updateUser(id, user);
@@ -54,7 +66,10 @@ export default class UserInteractor
     // Check if user exists
     const userExists = await this.userRepository.getUserById(id);
     if (!userExists) {
-      throw Error(`User with id ${id} does not exist`);
+      throw {
+        statusCode: 400,
+        message: `User with id ${id} does not exist`
+      };
     }
 
     return await this.userRepository.deleteUser(id);
