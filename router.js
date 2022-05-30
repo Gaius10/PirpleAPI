@@ -1,9 +1,19 @@
+import { URLSearchParams } from 'url';
+
 function getPayloadFromRequest(request) {
   return new Promise((res, rej) => {
-    let payload = '';
-    request.on('data', chunk => payload += chunk.toString('utf8'));
     request.on('error', rej);
-    request.on('end', () => res(JSON.parse(payload)));
+
+    if (request.method === 'GET') {
+      let payload = {};
+      const searchParams = new URLSearchParams(request.url.split('?')[1]);
+      searchParams.forEach((value, key) => payload[key] = value);
+      res(payload);
+    } else {
+      let payload = '';
+      request.on('data', chunk => payload += chunk.toString('utf8'));
+      request.on('end', () => res(JSON.parse(payload)));
+    }
   });
 }
 
@@ -57,7 +67,7 @@ export default class Router {
   async route(request, response) {
     const { url, method } = request;
 
-    this.routePack = this.routes[url];
+    this.routePack = this.routes[url.split('?')[0]];
     if (!this.routePack) {
       response.writeHead(404, { 'Content-Type': 'text/plain' });
       response.end('Not found');
@@ -82,6 +92,7 @@ export default class Router {
     }
 
     const onion = new Onion(handler);
+
     middlewares.forEach(middleware => {
       onion.wrap(middleware);
     });
