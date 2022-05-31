@@ -75,6 +75,13 @@ export default class UserInteractor
   }
 
   async delete(id) {
+    if (!id) {
+      throw {
+        statusCode: 400,
+        message: 'Empty user id'
+      };
+    }
+
     // Check if user exists
     const userExists = await this.userRepository.getUserById(id);
     if (!userExists) {
