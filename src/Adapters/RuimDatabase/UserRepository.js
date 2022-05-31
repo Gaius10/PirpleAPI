@@ -26,9 +26,8 @@ export default class userRepository
     do id = randomBytes(16).toString('hex');
     while (this.db.exists(id));
 
-    await this.db.save(user, id);
-    user.id = id;
-    return user;
+    await this.db.save({ id, ...user }, id);
+    return { id, ...user };
   }
   updateUser(id, user) {
     user.id = id;
