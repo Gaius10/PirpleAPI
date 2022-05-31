@@ -49,6 +49,12 @@ export default class UserInteractor
   }
 
   async update(id, user) {
+    if (!id) {
+      throw {
+        statusCode: 400,
+        message: 'Invalid user id'
+      }
+    }
     if (!this.validateUser(user)) {
       throw {
         statusCode: 400,
