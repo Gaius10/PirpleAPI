@@ -1,12 +1,21 @@
-export default class UserInteractor
-{
+import { pbkdf2Sync } from 'crypto';
+
+export default class UserInteractor {
   constructor(userRepository) {
     this.userRepository = userRepository;
   }
 
   /** @todo To improve this validation */
   validateUser({ name, phone, email, password }) {
-    return name && phone && email && password;
+    return name && phone && email && password &&
+      typeof password == 'string' &&
+      typeof name     == 'string' &&
+      typeof phone    == 'string' &&
+      typeof email    == 'string';
+  }
+
+  presentUser({ id, name, phone, email, password }) {
+    return { id, name, phone, email };
   }
 
   async getById(id) {
@@ -24,7 +33,7 @@ export default class UserInteractor
   }
 
   async get(filters) {
-    return await this.userRepository.getUsers(filters);
+    return (await this.userRepository.getUsers(filters)).map(this.presentUser);
   }
 
   async create(user) {
@@ -44,8 +53,16 @@ export default class UserInteractor
       };
     }
 
+    // Hash password
+    const salt = process.env.APP_KEY;
+    if (!salt) throw new Error('APP_KEY is not defined');
+
+    user.password = pbkdf2Sync(user.password, salt, 100000, 64, 'sha512').toString('hex');
+
     // Create user
-    return await this.userRepository.createUser(user);
+    return this.presentUser(
+      await this.userRepository.createUser(user)
+    );
   }
 
   async update(id, user) {
@@ -70,6 +87,13 @@ export default class UserInteractor
         message: `User with id '${id}' does not exist`
       };
     }
+
+
+    // Hash password
+    const salt = process.env.APP_KEY;
+    if (!salt) throw new Error('APP_KEY is not defined');
+
+    user.password = pbkdf2Sync(user.password, salt, 100000, 64, 'sha512').toString('hex');
 
     return await this.userRepository.updateUser(id, user);
   }

@@ -5,6 +5,10 @@ import http from 'http';
 import https from 'https';
 import Router from './router.js';
 
+Object.keys(config.env).forEach(key => {
+  process.env[key] = config.env[key];
+});
+
 /**
  * Middlewares...
  */
@@ -14,7 +18,8 @@ import errorHandler from './src/Infra/Web/Middlewares/error-handler.js';
 /**
  * Handlers...
  */
-import user from './src/Infra/Web/Handlers/user.js';
+import user  from './src/Infra/Web/Handlers/user.js';
+import token from './src/Infra/Web/Handlers/token.js';
 
 
 /**
@@ -24,11 +29,18 @@ const router = new Router();
 
 router.get('/', () => { return { statusCode: 200, body: { message: 'Working!' } } });
 
-router.get('/user',      user.read);
-router.get('/user/list', user.list);
-router.post('/user',     user.create);
-router.put('/user',      user.update);
-router.delete('/user',   user.delete);
+// User
+router.get('/user',      user.read);   // OK
+router.get('/user/list', user.list);   // OK
+router.post('/user',     user.create); // OK
+router.put('/user',      user.update); // OK
+router.delete('/user',   user.delete); // OK
+
+// Token
+// @todo Implement a refresh token system with JWT
+// @todo Implement a oauth system
+router.post('/token',   token.create); // @todo
+router.delete('/token', token.revoke); // @todo
 
 router.addMiddleware(errorHandler);
 
