@@ -5,6 +5,7 @@
   "type": "module",
   "author": "Caio Corrêa Chaves",
   "scripts": {
-    "dev": "NODE_PATH=`pwd`/lib STORAGE_PATH=`pwd`/storage/database node index.js"
+    "serve": "NODE_PATH=`pwd`/lib STORAGE_PATH=`pwd`/storage/database node index.js",
+    "test": "NODE_PATH=`pwd`/lib STORAGE_PATH=`pwd`/storage/database node tests/index.js"
   }
 }

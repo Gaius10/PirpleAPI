@@ -1,7 +1,12 @@
-import UserInteractor from '../../../Interactors/UserInteractor.js';
+import TokenInteractor from '../../../Interactors/TokenInteractor.js';
 import UserRepository from '../../../Adapters/RuimDatabase/UserRepository.js';
+import TokenRepository from '../../../Adapters/RuimDatabase/TokenRepository.js';
 
 /** @todo move this instantiation out of here */
+const tokenInteractor = new TokenInteractor(
+  new UserRepository(),
+  new TokenRepository()
+);
 
 export default {
   async create({ payload, request }) {

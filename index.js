@@ -13,7 +13,8 @@ Object.keys(config.env).forEach(key => {
  * Middlewares...
  */
 import errorHandler from './src/Infra/Web/Middlewares/error-handler.js';
-
+import session      from './src/Infra/Web/Middlewares/session.js';
+import auth         from './src/Infra/Web/Middlewares/auth.js';
 
 /**
  * Handlers...
@@ -30,18 +31,19 @@ const router = new Router();
 router.get('/', () => { return { statusCode: 200, body: { message: 'Working!' } } });
 
 // User
-router.get('/user',      user.read);   // OK
-router.get('/user/list', user.list);   // OK
 router.post('/user',     user.create); // OK
-router.put('/user',      user.update); // OK
-router.delete('/user',   user.delete); // OK
+router.get('/user',      user.read,   [ auth ]);   // OK
+router.get('/user/list', user.list,   [ auth ]);   // OK
+router.put('/user',      user.update, [ auth ]); // OK
+router.delete('/user',   user.delete, [ auth ]); // OK
 
 // Token
 // @todo Implement a refresh token system with JWT
 // @todo Implement a oauth system
-router.post('/token',   token.create); // @todo
-router.delete('/token', token.revoke); // @todo
+router.post('/token',   token.create); // @test
+router.delete('/token', token.revoke, [ auth ]); // @test
 
+router.addMiddleware(session);
 router.addMiddleware(errorHandler);
 
 /**
@@ -64,3 +66,5 @@ https.createServer({
 }, (req, res) => {
   router.route(req, res);
 }).listen(config.httpsPort);
+
+console.log('Server running at https://localhost:' + config.httpsPort);
