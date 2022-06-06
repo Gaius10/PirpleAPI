@@ -1,7 +1,7 @@
 import { RuimDatabase } from '../../../lib/RuimDatabase/RuimDatabase.js';
 import { randomBytes } from 'crypto' // For generating random IDs
 
-export default class userRepository
+export default class UserRepository
 {
   constructor() {
     this.db = new RuimDatabase(process.env.STORAGE_PATH + '/users');
